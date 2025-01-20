@@ -17,7 +17,7 @@ public class GeminiAi {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String API_KEY = "AIzaSyA_nl1rUM1HQ38HRgqhwrKZzj3-Hwv15hM";
+    private static final String API_KEY = ${GEMINI_API_KEY};
     private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
 
     public GeminiApiResponse callGeminiApi(String prompt) {
