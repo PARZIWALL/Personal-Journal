@@ -1,0 +1,2 @@
+25-01-20 11:12:59.945 [main] INFO  n.e.journalApp.JournalApplication - Starting JournalApplication using Java 21.0.5 on BOT with PID 14456 (C:\Users\gagan\Downloads\journalApp\journalApp\target\classes started by gagan in C:\Users\gagan\Downloads\journalApp) 
+25-01-20 11:12:59.958 [main] INFO  n.e.journalApp.JournalApplication - No active profile set, falling back to 1 default profile: "default" 
