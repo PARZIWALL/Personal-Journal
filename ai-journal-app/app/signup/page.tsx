@@ -8,15 +8,39 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 
 export default function SignUp() {
   const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [sentimentAnalysis, setSentimentAnalysis] = useState(false)
+  const [error, setError] = useState("")
   const router = useRouter()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement API call to your Spring Boot backend for sign-up
-    console.log("Sign up with:", username, password)
-    // Assuming sign-up is successful, redirect to login
-    router.push("/login")
+    setError("")
+
+    try {
+      const response = await fetch("http://localhost:8080/public/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userName: username,
+          email,
+          password,
+          sentimentAnalysis,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Signup failed. Please try again.")
+      }
+
+      console.log("Signup successful!")
+      router.push("/login") // Redirect to login after successful signup
+    } catch (err: any) {
+      setError(err.message)
+    }
   }
 
   return (
@@ -36,12 +60,29 @@ export default function SignUp() {
                 required
               />
               <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Input
                 type="password"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={sentimentAnalysis}
+                  onChange={(e) => setSentimentAnalysis(e.target.checked)}
+                  className="mr-2"
+                />
+                <label>Enable Sentiment Analysis</label>
+              </div>
+              {error && <p className="text-red-500">{error}</p>}
             </div>
             <CardFooter className="flex justify-between mt-4">
               <Button type="submit">Sign Up</Button>
@@ -52,4 +93,3 @@ export default function SignUp() {
     </div>
   )
 }
-

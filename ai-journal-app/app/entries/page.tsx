@@ -8,7 +8,7 @@ export default function EntriesPage() {
   return (
     <div className="container mx-auto p-4 bg-gray-900">
       <Card className="w-full max-w-4xl mx-auto bg-gray-800 text-gray-100">
-        <CardHeader>
+        <CardHeader className="flex justify-between items-center">
           <CardTitle className="text-2xl">Your Journal Entries</CardTitle>
           <Link href="/journal" passHref>
             <Button>New Entry</Button>
@@ -23,4 +23,3 @@ export default function EntriesPage() {
     </div>
   )
 }
-

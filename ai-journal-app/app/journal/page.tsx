@@ -1,88 +1,102 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/custom-button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
+import { useState } from "react";
 
-export default function JournalEntry() {
-  const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+const JournalPage = () => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [aiGeneratedContent, setAiGeneratedContent] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      // TODO: Implement API call to your Spring Boot backend for AI content generation
-      const aiGeneratedContent = await generateAIContent(content)
-
-      // TODO: Implement API call to your Spring Boot backend to save the journal entry
-      await saveJournalEntry(title, aiGeneratedContent)
-
-      // Redirect to entries list after submission
-      router.push("/entries")
-    } catch (error) {
-      console.error("Error saving entry:", error)
-      // TODO: Implement error handling (e.g., show error message to user)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Placeholder function for AI content generation
   const generateAIContent = async (userContent: string): Promise<string> => {
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    return `AI-generated content based on: "${userContent}". This would typically be much longer and more detailed, reflecting the style and content of your original entry while expanding on the themes and ideas presented.`
-  }
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:8080/journal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: userContent }),
+      });
 
-  // Placeholder function for saving journal entry
+      if (!response.ok) throw new Error("Failed to generate AI content");
+
+      const data = await response.json();
+      return data.content; // Assuming backend returns the AI-modified content
+    } catch (error) {
+      console.error("Error generating AI content:", error);
+      return userContent; // Fallback to user content
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const saveJournalEntry = async (title: string, content: string) => {
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    console.log("Saving journal entry:", { title, content })
-  }
+    try {
+      const response = await fetch("http://localhost:8080/journal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: title, content }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save journal entry");
+
+      console.log("Journal entry saved successfully");
+      alert("Journal entry saved successfully!");
+    } catch (error) {
+      console.error("Error saving journal entry:", error);
+    }
+  };
+
+  const handleGenerateClick = async () => {
+    const generatedContent = await generateAIContent(content);
+    setAiGeneratedContent(generatedContent);
+  };
+
+  const handleSaveClick = () => {
+    saveJournalEntry(title, aiGeneratedContent || content);
+  };
 
   return (
-    <div className="container mx-auto p-4 bg-gray-900">
-      <Card className="w-full max-w-4xl mx-auto bg-gray-800 text-gray-100">
-        <CardHeader>
-          <CardTitle>Write Your Journal Entry</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <Input
-                type="text"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className="bg-gray-700 text-gray-100 border-gray-600"
-              />
-              <Textarea
-                placeholder="Write your journal entry here..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={6}
-                required
-                className="bg-gray-700 text-gray-100 border-gray-600"
-              />
-            </div>
-            <CardFooter className="flex justify-end mt-4">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Generating and Saving..." : "Generate AI Content & Save"}
-              </Button>
-            </CardFooter>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="p-6 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Journal Entry</h1>
+      <input
+        type="text"
+        placeholder="Enter title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full p-2 mb-4 border rounded"
+      />
+      <textarea
+        placeholder="Write your journal entry..."
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full p-2 mb-4 border rounded h-32"
+      ></textarea>
+      <button
+        onClick={handleGenerateClick}
+        className="bg-blue-500 text-white p-2 rounded mb-4"
+        disabled={loading}
+      >
+        {loading ? "Generating..." : "Generate AI Content"}
+      </button>
+      {aiGeneratedContent && (
+        <textarea
+          value={aiGeneratedContent}
+          readOnly
+          className="w-full p-2 mb-4 border rounded h-32 bg-gray-100"
+        ></textarea>
+      )}
+      <button
+        onClick={handleSaveClick}
+        className="bg-green-500 text-white p-2 rounded"
+      >
+        Save Journal Entry
+      </button>
     </div>
-  )
-}
+  );
+};
 
+export default JournalPage;

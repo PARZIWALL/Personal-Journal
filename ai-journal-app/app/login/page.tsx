@@ -9,14 +9,33 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 export default function Login() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement API call to your Spring Boot backend for login
-    console.log("Login with:", username, password)
-    // Assuming login is successful, redirect to journal page
-    router.push("/journal")
+    setError("")
+
+    try {
+      const response = await fetch("http://localhost:8080/public/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ userName: username, password })
+      })
+
+      if (response.ok) {
+        const token = await response.text() // Get JWT token
+        localStorage.setItem("token", token) // Store token for authentication
+        router.push("/journal") // Redirect after successful login
+      } else {
+        setError("Invalid username or password")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      setError("Something went wrong. Please try again.")
+    }
   }
 
   return (
@@ -43,6 +62,7 @@ export default function Login() {
                 required
               />
             </div>
+            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
             <CardFooter className="flex justify-between mt-4">
               <Button type="submit">Login</Button>
             </CardFooter>
@@ -52,4 +72,3 @@ export default function Login() {
     </div>
   )
 }
-

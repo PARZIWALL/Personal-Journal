@@ -32,7 +32,9 @@ public class SpringSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
+        http.cors().and().csrf().disable()
+        .authorizeRequests()
+                .antMatchers("/public/signup", "/public/login").permitAll()
                 .antMatchers("/journal/**", "/user/**").authenticated()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll();
